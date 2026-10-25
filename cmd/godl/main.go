@@ -39,6 +39,7 @@ func run() int {
 	fileSet, err := manager.ExistingFilenames(*outputDirectory)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "read output directory %q: %v\n", *outputDirectory, err)
+		return 2
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
