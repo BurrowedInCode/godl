@@ -115,7 +115,6 @@ The tool downloads HTTP responses. It does not crawl websites, discover download
 ## File Handling and Limitations
 
 - **Filename selection:** Filenames come from the supplied URL paths, not `Content-Disposition` headers. URLs without usable filenames, including paths ending in `/`, are rejected.
-- **Naming collisions:** Collision detection between jobs is not implemented. Ensure every output path and its corresponding `.part` path are distinct from those of other jobs. For example, do not download two URLs ending in `data.csv`, or schedule both `archive.zip` and `archive.zip.part` in the same directory.
 - **Existing files:** A completed output file detected before the request causes an error. This check is not an atomic no-overwrite guarantee; avoid concurrent processes writing to the same destination.
 - **Partial files:** Downloads use `<filename>.part`. An existing `.part` file is truncated when writing starts; it is not resumed. Cleanup is attempted after streaming, file-close, or rename failures, but cleanup errors are currently ignored. Abrupt process termination may also leave partial files behind.
 - **Retries:** HTTP and network failures are reported without automatic retry.
