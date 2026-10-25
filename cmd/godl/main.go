@@ -18,7 +18,6 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
-// TODO: Check for naming collisions between jobs' output and .part paths before starting downloads.
 func run() int {
 	outputDirectory := flag.String("o", "", "Output directory")
 	workers := flag.Int("j", 4, "Maximum concurrent downloads")
@@ -35,6 +34,11 @@ func run() int {
 	if *workers < 1 {
 		fmt.Fprintln(os.Stderr, "-j must be at least 1")
 		return 2
+	}
+
+	fileSet, err := manager.ExistingFilenames(*outputDirectory)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "read output directory %q: %v\n", *outputDirectory, err)
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -55,6 +59,7 @@ func run() int {
 		}
 
 		fileName := path.Base(u.Path)
+		fileName = manager.RenameDuplicateFile(fileName, fileSet)
 
 		switch fileName {
 		case "", ".", "..", "/":
