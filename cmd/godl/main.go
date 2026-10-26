@@ -60,8 +60,6 @@ func run() int {
 		}
 
 		fileName := path.Base(u.Path)
-		fileName = manager.RenameDuplicateFile(fileName, fileSet)
-
 		switch fileName {
 		case "", ".", "..", "/":
 			fmt.Fprintf(os.Stderr, "URL has no usable filename: %q\n", rawURL)
@@ -72,6 +70,8 @@ func run() int {
 			fmt.Fprintf(os.Stderr, "URL path ends in a slash: %q\n", rawURL)
 			return 2
 		}
+
+		fileName = manager.RenameDuplicateFile(fileName, fileSet)
 
 		outputPath := filepath.Join(*outputDirectory, fileName)
 
