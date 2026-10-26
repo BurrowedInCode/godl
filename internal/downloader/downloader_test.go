@@ -295,7 +295,16 @@ func TestDownloadRemovesPartialFileWhenCanceling(t *testing.T) {
 		t.Fatal("timed out waiting for download to write")
 	}
 
-	partPath := outputPath + ".part"
+	matches, err := filepath.Glob(filepath.Join(filepath.Dir(outputPath), ".godl-*.part"))
+
+	if err != nil {
+		t.Fatalf("find partial file: %v", err)
+	}
+	if len(matches) != 1 {
+		t.Fatalf("got %d partial files, want 1", len(matches))
+	}
+
+	partPath := matches[0]
 
 	if _, err := os.Stat(partPath); err != nil {
 		t.Fatalf("partial file was not created: %v", err)

@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 type ProgressReporter interface {
@@ -51,12 +52,12 @@ func Download(ctx context.Context, client *http.Client, rawURL, outputPath strin
 
 	reporter.SetTotal(resp.ContentLength)
 
-	partPath := outputPath + ".part"
-
-	partFile, err := os.Create(partPath)
+	partFile, err := os.CreateTemp(filepath.Dir(outputPath), ".godl-*.part")
 	if err != nil {
 		return fmt.Errorf("create file: %w", err)
 	}
+
+	partPath := partFile.Name()
 
 	pr := progressWriter{w: partFile, reporter: reporter}
 
@@ -73,9 +74,13 @@ func Download(ctx context.Context, client *http.Client, rawURL, outputPath strin
 		return fmt.Errorf("close file: %w", closeErr)
 	}
 
-	if err := os.Rename(partPath, outputPath); err != nil {
+	if err := os.Link(partPath, outputPath); err != nil {
 		_ = os.Remove(partPath)
-		return fmt.Errorf("rename file: %w", err)
+		return fmt.Errorf("publish file: %w", err)
+	}
+
+	if err := os.Remove(partPath); err != nil {
+		return fmt.Errorf("file saved, but temporary file cleanup failed: %w", err)
 	}
 
 	return nil
