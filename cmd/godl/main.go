@@ -60,6 +60,7 @@ func run() int {
 		}
 
 		fileName := path.Base(u.Path)
+
 		switch fileName {
 		case "", ".", "..", "/":
 			fmt.Fprintf(os.Stderr, "URL has no usable filename: %q\n", rawURL)
